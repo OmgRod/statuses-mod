@@ -14,7 +14,6 @@ public:
     static void connect();
     static void open();
     static void onMessage(std::string message);
-    // GJAccountManager::unlinkFromAccount();
     static void closeSocketAndDeauth();
     static void onMessageThreaded(std::string message);
     static void sendMessage(std::string message);

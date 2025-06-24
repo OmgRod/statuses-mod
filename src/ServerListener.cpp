@@ -38,7 +38,6 @@ void ServerListener::connect() {
 
     ws->start();
 
-    // Send auth message
     matjson::Value object;
     matjson::Value dataObject;
     dataObject.set("token", geode::Mod::get()->getSavedValue<std::string>("token"));
@@ -54,48 +53,12 @@ void ServerListener::onMessageThreaded(std::string message) {
     std::string packet_type = object["packet_type"].asString().unwrap();
     std::string packet_data = object["data"].asString().unwrap();
 
-    if (packet_type == "auth_response") {
-        matjson::Value data = matjson::parse(packet_data).unwrap();
-        if (!data.contains("success")) return;
-
-        if (data["success"].asBool().unwrap()) {
-            matjson::Value object;
-            matjson::Value dataObject;
-            object.set("packet_type", "get_user_settings");
-            object.set("data", dataObject.dump());
-            ws->send(object.dump());
-        } else {
-            geode::log::error("WS Authentication failed!");
-        }
-    }
-
     if (packet_type == "ping") {
         matjson::Value object;
         matjson::Value dataObject;
         object.set("packet_type", "pong");
         object.set("data", dataObject.dump());
         ws->send(object.dump());
-    }
-
-    if (packet_type == "auth_failed") {
-        Mod::get()->setSavedValue<bool>("authenticated", false);
-        StatusManager::get()->isWSOpen = false;
-        StatusManager::get()->autoReconnect = false;
-        StatusManager::get()->autoRunAuth = true;
-        StatusManager::get()->reset();
-        Loader::get()->queueInMainThread([]() {
-            createQuickPopup(
-                "Uh Oh!",
-                "You've been <cr>deauthorized</c> from <cg>Statuses</c>!\n"
-                "Would you like to open your <co>profile</c> to <cy>authenticate</c> again?\n"
-                "<cb>(To authenticate you need to press the Status Icon on your profile)</c>",
-                "Later", "OPEN",
-                [](auto, bool btn2) {
-                    if (btn2) {
-                        ProfilePage::create(GJAccountManager::get()->m_accountID, true)->show();
-                    }
-                });
-        });
     }
 
     if (packet_type == "user_settings_response") {

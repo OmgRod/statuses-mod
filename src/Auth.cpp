@@ -8,7 +8,7 @@
 
 using namespace geode::prelude;
 
-LoadingOverlay* loading;
+class Auth;
 
 class $modify(AuthHook, MenuLayer) {
     bool init() {
@@ -19,15 +19,13 @@ class $modify(AuthHook, MenuLayer) {
             StatusManager::get()->autoReconnect &&
             StatusManager::get()->isWSOpen == false) {
             ServerListener::connectAsync();
-        } else {
+        }
+        else {
             if (Mod::get()->getSavedValue<bool>("auth-info-popup-showed") != true) {
-                std::thread openAuthPopup = std::thread([this]() {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-                    Loader::get()->queueInMainThread([this]() {
-                        this->showAuthPopup();
-                    });
+                std::this_thread::sleep_for(std::chrono::milliseconds(250));
+                Loader::get()->queueInMainThread([this]() {
+                    this->showAuthPopup();
                 });
-                openAuthPopup.detach();
             }
         }
         return true;
@@ -47,65 +45,6 @@ class $modify(AuthHook, MenuLayer) {
     }
 };
 
-void Auth::authenticationStart() {
-    auto GAM = GJAccountManager::get();
-
-    if (GAM->m_accountID == 0) {
-        FLAlertLayer::create("Oops!", "You need to <cg>log in</c> to use this mod.", "OK")->show();
-        return;
-    }
-
-    loading = LoadingOverlay::create("Authenticating..");
-    loading->show();
-
-    auto res = argon::startAuth(
-        [](Result<std::string> result) {
-            if (!result) {
-                Loader::get()->queueInMainThread([err = result.unwrapErr()] {
-                    loading->fadeOut();
-                    FLAlertLayer::create("Oops!", fmt::format("Authentication failed:\n<cr>{}</c>", err), "OK")->show();
-                    StatusManager::get()->authFailed = true;
-                });
-                return;
-            }
-
-            auto token = result.unwrap();
-
-            Loader::get()->queueInMainThread([token = std::move(token)] {
-                Mod::get()->setSavedValue("authenticated", true);
-                Mod::get()->setSavedValue("token", token);
-                StatusManager::get()->authFailed = false;
-                StatusManager::get()->autoReconnect = true;
-                ServerListener::connectAsync();
-
-                std::thread showSuccessThread = std::thread([]() {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-                    Loader::get()->queueInMainThread([] {
-                        loading->fadeOut();
-                        ProfilePage::create(GJAccountManager::get()->m_accountID, true)->show();
-                    });
-                    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-                    Loader::get()->queueInMainThread([] {
-                        FLAlertLayer::create("Success!", "You've been successfully <cg>authorized</c>.", "OK")->show();
-                    });
-                });
-                showSuccessThread.detach();
-            });
-        },
-        [](argon::AuthProgress progress) {
-            Loader::get()->queueInMainThread([progress] {
-                loading->changeStatus(fmt::format("Authenticating: {}...", argon::authProgressToString(progress)).c_str());
-            });
-        });
-
-    if (!res) {
-        Loader::get()->queueInMainThread([err = res.unwrapErr()] {
-            loading->fadeOut();
-            FLAlertLayer::create("Oops!", fmt::format("Failed to start auth:\n<cr>{}</c>", err), "OK")->show();
-        });
-    }
-}
-
 Auth* Auth::create() {
     auto ret = new Auth();
     if (ret) {
@@ -114,4 +53,98 @@ Auth* Auth::create() {
     }
     CC_SAFE_DELETE(ret);
     return nullptr;
+}
+
+void Auth::authenticationStart() {
+    auto GAM = GJAccountManager::get();
+
+    if (GAM->m_accountID == 0) {
+        FLAlertLayer::create("Oops!", "You need to <cg>log in</c> to use this mod.", "OK")->show();
+        return;
+    }
+
+    m_loading = std::shared_ptr<LoadingOverlay>(LoadingOverlay::create("Authenticating.."));
+    m_loading->show();
+
+    auto res = argon::startAuth(
+        [this](Result<std::string> result) {
+            if (!result) {
+                auto err = result.unwrapErr();
+                Loader::get()->queueInMainThread([this, err] {
+                    if (m_loading) {
+                        m_loading->fadeOut();
+                        m_loading.reset();
+                    }
+                    FLAlertLayer::create("Oops!", fmt::format("Authentication failed:\n<cr>{}</c>", err), "OK")->show();
+                    StatusManager::get()->authFailed = true;
+                });
+                return;
+            }
+
+            auto token = std::move(result).unwrap();
+
+            Loader::get()->queueInMainThread([this, token = std::move(token)]() mutable {
+                this->onAuthSuccess(token);
+            });
+        },
+        [this](argon::AuthProgress progress) {
+            Loader::get()->queueInMainThread([this, progress] {
+                this->onAuthProgress(progress);
+            });
+        });
+
+    if (!res) {
+        auto err = res.unwrapErr();
+        Loader::get()->queueInMainThread([this, err] {
+            if (m_loading) {
+                m_loading->fadeOut();
+                m_loading.reset();
+            }
+            FLAlertLayer::create("Oops!", fmt::format("Failed to start auth:\n<cr>{}</c>", err), "OK")->show();
+        });
+    }
+}
+
+void Auth::onAuthSuccess(const std::string& token) {
+    Mod::get()->setSavedValue("authenticated", true);
+    Mod::get()->setSavedValue("token", token);
+    StatusManager::get()->authFailed = false;
+    StatusManager::get()->autoReconnect = true;
+    ServerListener::connectAsync();
+
+    std::thread showSuccessThread([loading = m_loading, this]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+        Loader::get()->queueInMainThread([loading]() {
+            if (loading) {
+                loading->fadeOut();
+            }
+        });
+
+        Loader::get()->queueInMainThread([] {
+            ProfilePage::create(GJAccountManager::get()->m_accountID, true)->show();
+        });
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        Loader::get()->queueInMainThread([] {
+            FLAlertLayer::create("Success!", "You've been successfully <cg>authorized</c>.", "OK")->show();
+        });
+    });
+    showSuccessThread.detach();
+
+    m_loading.reset();
+}
+
+void Auth::onAuthFailure(const std::string& err) {
+    if (m_loading) {
+        m_loading->fadeOut();
+        m_loading.reset();
+    }
+    FLAlertLayer::create("Oops!", fmt::format("Authentication failed:\n<cr>{}</c>", err), "OK")->show();
+    StatusManager::get()->authFailed = true;
+}
+
+void Auth::onAuthProgress(argon::AuthProgress progress) {
+    if (m_loading) {
+        m_loading->changeStatus(fmt::format("Authenticating: {}...", argon::authProgressToString(progress)).c_str());
+    }
 }
