@@ -1,14 +1,7 @@
-#include "CustomStatusLayer.hpp"
-#include "GUI/CCControlExtension/CCScale9Sprite.h"
-#include "Geode/binding/CCMenuItemSpriteExtra.hpp"
-#include "Geode/cocos/actions/CCActionEase.h"
-#include "Geode/cocos/cocoa/CCObject.h"
-#include "Geode/cocos/label_nodes/CCLabelBMFont.h"
-#include "Geode/cocos/robtop/keyboard_dispatcher/CCKeyboardDelegate.h"
-#include "Geode/cocos/sprite_nodes/CCSprite.h"
 #include <Geode/ui/TextInput.hpp>
+#include "CustomStatusLayer.hpp"
 #include "StatusManager.hpp"
-#include "OptionPicker.hpp"
+
 CustomStatusLayer *CustomStatusLayer::create(StatusChangeLayer*changeLayer) {
     auto ret = new CustomStatusLayer();
     ret->m_mainLayer = CCLayer::create();
@@ -126,7 +119,7 @@ bool CustomStatusLayer::init() {
     //this->m_mainLayer->runAction(
     //    CCEaseElasticOut::create(CCScaleTo::create(1.f,1.f))
     //);
-    this->m_mainLayer->runAction(cocos2d::CCEaseElasticOut::create(cocos2d::CCScaleTo::create(0.5f, 1.0), 0.6f));
+    this->m_mainLayer->runAction(::CCEaseElasticOut::create(::CCScaleTo::create(0.5f, 1.0), 0.6f));
     this->addChild(m_mainLayer);
     this->setZOrder(1000);
 
@@ -145,12 +138,12 @@ void CustomStatusLayer::onSet(CCObject* sender){
     changeLayer->setTouchEnabled(false);
     changeLayer->removeFromParent();
 }
-void CustomStatusLayer::keyDown(cocos2d::enumKeyCodes key) {
-    if (key == cocos2d::enumKeyCodes::KEY_Escape){
+void CustomStatusLayer::keyDown(::enumKeyCodes key) {
+    if (key == ::enumKeyCodes::KEY_Escape){
         this->setTouchEnabled(false);
         this->removeFromParent();
     }
-    if (key == cocos2d::enumKeyCodes::KEY_Enter){
+    if (key == ::enumKeyCodes::KEY_Enter){
         this->onSet(this);
     }
 }

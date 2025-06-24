@@ -1,12 +1,12 @@
-#include "Geode/cocos/label_nodes/CCLabelBMFont.h"
+#include <Geode/Geode.hpp>
+#include <Geode/modify/ProfilePage.hpp>
 #include "StatusIconNode.hpp"
 #include "utils.hpp"
-#include <Geode/Geode.hpp>
-using namespace geode::prelude;
 #include "StatusChangeLayer.hpp"
 #include "StatusManager.hpp"
 #include "Auth.h"
-#include <Geode/modify/ProfilePage.hpp>
+
+using namespace geode::prelude;
 
 class $modify(MyProfilePage, ProfilePage) {
     struct Fields {
@@ -14,7 +14,7 @@ class $modify(MyProfilePage, ProfilePage) {
         bool statusSpriteAdded = false;
         int accID;
     };
-    void onChangeStatus(CCObject * sender) {
+    void onChangeStatus(CCObject* sender) {
         if (Mod::get()->getSavedValue<bool>("authenticated") != true || StatusManager::get()->authFailed){
             auto auth = Auth::create();
             auth->authenticationStart();
@@ -28,11 +28,11 @@ class $modify(MyProfilePage, ProfilePage) {
         auto statusChangeLayer = StatusChangeLayer::create(btn->convertToWorldSpace({0,0}), static_cast<CCMenuItemSpriteExtra *>(sender));
         scene->addChild(statusChangeLayer);
     }
-    void onClose(CCObject * sender) {
+    void onClose(CCObject* sender) {
 
         ProfilePage::onClose(sender);
     }
-    void loadPageFromUserInfo(GJUserScore * info) {
+    void loadPageFromUserInfo(GJUserScore* info) {
         // FLAlertLayer::create("h",fmt::format("Account ID: {}\nUser ID: {}",info->m_accountID,info->m_userID),"OK")->show();
         ProfilePage::loadPageFromUserInfo(info);
         if (this->m_fields->statusSpriteAdded) {
@@ -47,7 +47,7 @@ class $modify(MyProfilePage, ProfilePage) {
             this->m_fields->statusSprite = CCSprite::createWithSpriteFrameName(status_mod::getStatusFrameNameFromType(StatusManager::get()->getCurrentStatus().type));
             this->m_fields->statusSprite->setScale(.75f);
             CCMenuItemSpriteExtra *changeStatusBtn = CCMenuItemSpriteExtra::create(this->m_fields->statusSprite, this, menu_selector(MyProfilePage::onChangeStatus));
-            auto usernameMenu = static_cast<cocos2d::CCMenu *>(this->m_mainLayer->getChildByIDRecursive("username-menu"));
+            auto usernameMenu = static_cast<::CCMenu *>(this->m_mainLayer->getChildByIDRecursive("username-menu"));
             //auto changeStatusMenu = CCMenu::create();
             //changeStatusMenu->addChild(changeStatusBtn);
             //changeStatusMenu->setPosition((usernameLabel->getPositionX() - usernameLabel->getScaledContentSize().width / 2) - (10.5f + offset), usernameLabel->getPositionY() - 2);
@@ -57,8 +57,8 @@ class $modify(MyProfilePage, ProfilePage) {
         } else {
             auto statusIcon = StatusIconNode::create(info->m_accountID);
             statusIcon->setScale(.75f);
-            //auto usernameLabel = static_cast<cocos2d::CCLabelBMFont *>(this->m_mainLayer->getChildByIDRecursive("username-label"));
-            auto usernameMenu = static_cast<cocos2d::CCMenu *>(this->m_mainLayer->getChildByIDRecursive("username-menu"));
+            //auto usernameLabel = static_cast<::CCLabelBMFont *>(this->m_mainLayer->getChildByIDRecursive("username-label"));
+            auto usernameMenu = static_cast<::CCMenu *>(this->m_mainLayer->getChildByIDRecursive("username-menu"));
             //auto changeStatusMenu = CCMenu::create();
             //changeStatusMenu->addChild(statusIcon);
             //changeStatusMenu->setPosition((usernameLabel->getPositionX() - usernameLabel->getScaledContentSize().width / 2) - (10.5f + offset), usernameLabel->getPositionY() - 2);

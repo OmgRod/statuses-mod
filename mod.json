@@ -1,26 +1,27 @@
 {
-	"geode": "3.2.0",
+	"geode": "4.6.1",
 	"gd": {
-		"win":"2.206",
-		"android":"2.206"
+		"win":"2.2074",
+		"android":"2.2074",
+		"ios": "2.2074",
+		"mac": "2.2074"
 	},
-	"dependencies":[{
-        "id": "geode.node-ids",
-        "version":">=1.8.1",
-        "importance":"required"
-    }],
-	"incompatibilities": [
-		{
-			"id": "xanii.youtubers",
+	"dependencies":{
+		"geode.node-ids": {
+			"version":">=1.21.1",
+			"importance":"required"
+		}
+	},
+	"incompatibilities": {
+		"xanii.youtubers": {
 			"importance": "conflicting",
 			"version": "*"
 		},
-		{
-			"id": "uproxide.geodedevelopers",
+		"uproxide.geodedevelopers": {
 			"importance": "conflicting",
 			"version": "*"
 		}
-	],
+	},
 	"resources": {
 		"spritesheets": {
 			"statusSheet1":[
@@ -35,6 +36,6 @@
 	"version": "v1.1.0",
 	"id": "cdc.statuses",
 	"name": "Statuses",
-	"developer": "cdc",
+	"developers": ["cdc", "OmgRod"],
 	"description": "Displays statuses on profiles, comments, account comments, level cells and level pages"
 }

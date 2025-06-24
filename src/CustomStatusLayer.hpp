@@ -14,7 +14,7 @@ class CustomStatusLayer : public CCLayer {
     bool ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent) override;
     void registerWithTouchDispatcher() override;
     void update(float dt) override;
-    void keyDown(cocos2d::enumKeyCodes key) override;
+    void keyDown(::enumKeyCodes key) override;
     void onCancel(CCObject*sender);
     void onSet(CCObject*sender);
     void onSwitchPage(CCObject*sender);

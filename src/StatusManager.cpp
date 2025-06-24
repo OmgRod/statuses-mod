@@ -1,5 +1,8 @@
 #include "StatusManager.hpp"
 #include "ServerListener.hpp"
+
+using namespace geode::prelude;
+
 StatusManager *StatusManager::get() {
     static StatusManager a;
     return &a;
@@ -15,16 +18,6 @@ status_mod::Status StatusManager::getStatusForUser(int accID) {
 }
 void StatusManager::updateUserStatus(int accID, status_mod::Status status) {
     this->userStatuses[accID] = status;
-}
-void StatusManager::addStatusSprite(int accID, CCSprite *sprite) {
-    // this->statusSprites[accID].push_back(sprite);
-}
-void StatusManager::removeStatusSprite(int accID, CCSprite *sprite) {
-    /*std::vector<CCSprite*> sprites = statusSprites[accID];
-    auto index = std::find(sprites.begin(),sprites.end(), sprite);
-        if (index != sprites.end()){
-            sprites.erase(index);
-    }*/
 }
 void StatusManager::reset(){
     this->userStatuses.clear();
