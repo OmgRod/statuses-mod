@@ -47,7 +47,7 @@ class $modify(MyProfilePage, ProfilePage) {
             this->m_fields->statusSprite = CCSprite::createWithSpriteFrameName(status_mod::getStatusFrameNameFromType(StatusManager::get()->getCurrentStatus().type));
             this->m_fields->statusSprite->setScale(.75f);
             CCMenuItemSpriteExtra *changeStatusBtn = CCMenuItemSpriteExtra::create(this->m_fields->statusSprite, this, menu_selector(MyProfilePage::onChangeStatus));
-            auto usernameMenu = static_cast<::CCMenu *>(this->m_mainLayer->getChildByIDRecursive("username-menu"));
+            auto usernameMenu = static_cast<CCMenu*>(this->m_mainLayer->getChildByIDRecursive("username-menu"));
             //auto changeStatusMenu = CCMenu::create();
             //changeStatusMenu->addChild(changeStatusBtn);
             //changeStatusMenu->setPosition((usernameLabel->getPositionX() - usernameLabel->getScaledContentSize().width / 2) - (10.5f + offset), usernameLabel->getPositionY() - 2);
@@ -57,8 +57,8 @@ class $modify(MyProfilePage, ProfilePage) {
         } else {
             auto statusIcon = StatusIconNode::create(info->m_accountID);
             statusIcon->setScale(.75f);
-            //auto usernameLabel = static_cast<::CCLabelBMFont *>(this->m_mainLayer->getChildByIDRecursive("username-label"));
-            auto usernameMenu = static_cast<::CCMenu *>(this->m_mainLayer->getChildByIDRecursive("username-menu"));
+            //auto usernameLabel = static_cast<CCLabelBMFont*>(this->m_mainLayer->getChildByIDRecursive("username-label"));
+            auto usernameMenu = static_cast<CCMenu*>(this->m_mainLayer->getChildByIDRecursive("username-menu"));
             //auto changeStatusMenu = CCMenu::create();
             //changeStatusMenu->addChild(statusIcon);
             //changeStatusMenu->setPosition((usernameLabel->getPositionX() - usernameLabel->getScaledContentSize().width / 2) - (10.5f + offset), usernameLabel->getPositionY() - 2);

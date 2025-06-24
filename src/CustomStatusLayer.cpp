@@ -119,7 +119,7 @@ bool CustomStatusLayer::init() {
     //this->m_mainLayer->runAction(
     //    CCEaseElasticOut::create(CCScaleTo::create(1.f,1.f))
     //);
-    this->m_mainLayer->runAction(::CCEaseElasticOut::create(::CCScaleTo::create(0.5f, 1.0), 0.6f));
+    this->m_mainLayer->runAction(CCEaseElasticOut::create(CCScaleTo::create(0.5f, 1.0), 0.6f));
     this->addChild(m_mainLayer);
     this->setZOrder(1000);
 

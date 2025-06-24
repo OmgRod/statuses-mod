@@ -1,5 +1,6 @@
 #include "utils.hpp"
 #include "ServerListener.hpp"
+
 void status_mod::subscribeToStatusUpdates(int accID) {
     if (status_mod::isSubscribedToStatusUpdates(accID)) {
         return;
@@ -16,9 +17,11 @@ void status_mod::subscribeToStatusUpdates(int accID) {
 
     listeningTo.push_back(accID);
 }
+
 void status_mod::clearStatusSubscriptions() {
     listeningTo.clear();
 }
+
 bool status_mod::isSubscribedToStatusUpdates(int accID) {
     if (std::find(listeningTo.begin(), listeningTo.end(), accID) != listeningTo.end()) {
         return true;
